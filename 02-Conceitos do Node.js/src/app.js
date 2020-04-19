@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { uuid } = require("uuidv4");
+const { uuid, isUuid } = require("uuidv4");
 
 const app = express();
 
@@ -9,10 +9,16 @@ app.use(express.json());
 app.use(cors());
 
 /**
- * 
+ * Middleware de verificação de ID 
  */
-function checkID(request, response, next) {
+function validateRepositoryId(request, response, next) {
+  const { id } = request.params;
+  
+  if (!isUuid(id)) {
+    return response.status(400).json({ error: 'Oops! Invalid repository ID'});
+  }
 
+  return next();
 }
 
 const repositories = [];
@@ -37,7 +43,7 @@ app.post("/repositories", (request, response) => {
   response.json(repo);
 });
 
-app.put("/repositories/:id", (request, response) => {
+app.put("/repositories/:id", validateRepositoryId, (request, response) => {
   const { id } = request.params;
   const {title, url, techs } = request.body;
 
@@ -62,13 +68,9 @@ app.put("/repositories/:id", (request, response) => {
   response.json(repo);
 });
 
-app.delete("/repositories/:id", (request, response) => {
+app.delete("/repositories/:id", validateRepositoryId, (request, response) => {
   const { id } = request.params;
   
-  if (!isUuid(id)) {
-    response.status(400).json({ error: 'ID inválido'});
-  }
-
   const repoIndex = repositories.findIndex(r => r.id === id);
 
   if (repoIndex < 0) {
@@ -80,7 +82,7 @@ app.delete("/repositories/:id", (request, response) => {
   response.status(204).send();
 });
 
-app.post("/repositories/:id/like", (request, response) => {
+app.post("/repositories/:id/like", validateRepositoryId, (request, response) => {
   const { id } = request.params;
 
   const repo = repositories.find(r=> r.id == id);
