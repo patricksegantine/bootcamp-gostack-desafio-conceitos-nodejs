@@ -24,7 +24,7 @@ function validateRepositoryId(request, response, next) {
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
-  response.json(repositories);
+  return response.json(repositories);
 });
 
 app.post("/repositories", (request, response) => {
@@ -40,7 +40,7 @@ app.post("/repositories", (request, response) => {
 
   repositories.push(repo);
 
-  response.json(repo);
+  return response.json(repo);
 });
 
 app.put("/repositories/:id", validateRepositoryId, (request, response) => {
@@ -50,7 +50,7 @@ app.put("/repositories/:id", validateRepositoryId, (request, response) => {
   const repoIndex = repositories.findIndex(r => r.id == id);
 
   if (repoIndex < 0) {
-    response.status(400).json({ error: 'Repositório não encontrado '});
+    return response.status(400).json({ error: 'Repositório não encontrado '});
   }
 
   const {likes} = repositories[repoIndex];
@@ -65,7 +65,7 @@ app.put("/repositories/:id", validateRepositoryId, (request, response) => {
 
   repositories[repoIndex] = repo;
 
-  response.json(repo);
+  return response.json(repo);
 });
 
 app.delete("/repositories/:id", validateRepositoryId, (request, response) => {
@@ -74,12 +74,12 @@ app.delete("/repositories/:id", validateRepositoryId, (request, response) => {
   const repoIndex = repositories.findIndex(r => r.id === id);
 
   if (repoIndex < 0) {
-    response.status(400).json({ error: 'Repositório não encontrado '});
+    return response.status(400).json({ error: 'Repositório não encontrado '});
   }
 
   repositories.splice(repoIndex, 1);
 
-  response.status(204).send();
+  return response.status(204).send();
 });
 
 app.post("/repositories/:id/like", validateRepositoryId, (request, response) => {
@@ -88,12 +88,12 @@ app.post("/repositories/:id/like", validateRepositoryId, (request, response) => 
   const repo = repositories.find(r=> r.id == id);
 
   if (!repo) {
-    response.status(400).json({ error: 'Repositório não encontrado '});
+    return response.status(400).json({ error: 'Repositório não encontrado '});
   }
 
   repo.likes = Number(repo.likes) + 1;
 
-  response.json(repo);
+  return response.json(repo);
 });
 
 module.exports = app;
